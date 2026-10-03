@@ -171,7 +171,7 @@ body{
     min-height:760px;
 
     background-color:#000;
-    background-image:url('https://tse1.mm.bing.net/th/id/OIP.vzkv2nyL_V0umz151iaqAQHaLz?r=0&rs=1&pid=ImgDetMain&o=7&rm=3", "width":708, "height":1129}]}]}.Y21kZmj3l09iwr1He-8wF2AwBtpx4TwulFeB-aAkNcU');
+    background-image:url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/77cc0ddb-7661-4112-916d-d533378655f9/d4furyw-f91de097-294f-4ef6-9d43-f616dd14a9de.jpg/v1/fill/w_708,h_1129,q_75,strp/death_note_portada_1_by_xmarcoxfansubs-d4furyw.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl0sIm9iaiI6W1t7InBhdGgiOiIvZi83N2NjMGRkYi03NjYxLTQxMTItOTE2ZC1kNTMzMzc4NjU1ZjkvZDRmdXJ5dy1mOTFkZTA5Ny0yOTRmLTRlZjYtOWQ0My1mNjE2dd14a9de.jpg", "width":708, "height":1129}]}]}.Y21kZmj3l09iwr1He-8wF2AwBtpx4TwulFeB-aAkNcU');
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -458,6 +458,18 @@ button:active{
 button.secondary{
 
     background:#444;
+
+}
+
+button.reset-btn{
+
+    background:#600;
+
+}
+
+button.reset-btn:hover{
+
+    background:#900;
 
 }
 
@@ -849,6 +861,10 @@ for(let i=0;i<80;i++){
         🍎 PEDIR CONSEJO A RYUK
     </button>
 
+    <button class="reset-btn" onclick="resetGame()" style="width:100%; font-size:10px; padding:6px; margin-top:6px;">
+        🔄 REINICIAR PARTIDA
+    </button>
+
 </div>
 
 
@@ -1017,8 +1033,7 @@ CAUSA DE MUERTE
 
 <script>
 
-
-const criminals=[
+const initialCriminals=[
 
 {
 name:"Akio Kurogane",
@@ -1202,6 +1217,8 @@ danger:96
 
 ];
 
+let criminals = JSON.parse(JSON.stringify(initialCriminals));
+
 const firstNames=["Kazuma","Hideo","Takashi","Shinji","Minoru","Sora","Naoto","Keigo","Tomoaki","Yuji","Isamu","Ryuunosuke","Katsuri","Genji","Yoshiaki","Kenichi","Taro","Kazuya","Shohei","Mitsuhiro","Kazuki","Hiroshi","Tatsuro"];
 const lastNames=["Takahashi","Kobayashi","Watanabe","Yamamoto","Yoshida","Yamaguchi","Matsumoto","Inoue","Kimura","Saito","Shimizu","Yamazaki","Mori","Abe","Hashimoto","Sasaki","Ishikawa","Ogawa","Fujita","Okada"];
 
@@ -1350,6 +1367,10 @@ function updateHUD(){
 
         document.body.classList.add("danger");
 
+    }else{
+
+        document.body.classList.remove("danger");
+
     }
 
     localStorage.setItem(
@@ -1372,6 +1393,43 @@ function askRyukAdvice(){
     if(isGameOver) return;
     const randomTip = ryukTips[Math.floor(Math.random() * ryukTips.length)];
     showShinigami("Idea de Ryuk: " + randomTip);
+}
+
+function resetGame(){
+    deaths = 0;
+    suspicion = 0;
+    isGameOver = false;
+    target = null;
+    addedCounter = 1;
+
+    localStorage.removeItem("dn_deaths");
+    localStorage.removeItem("dn_suspicion");
+
+    criminals = JSON.parse(JSON.stringify(initialCriminals));
+
+    nameInput.disabled = false;
+    causeInput.disabled = false;
+    searchInput.disabled = false;
+    document.getElementById("writeBtn").disabled = false;
+
+    nameInput.value = "";
+    causeInput.value = "";
+    searchInput.value = "";
+    historyList.innerHTML = "";
+
+    targetBox.innerHTML = `
+        <div class="criminal-info">
+            NINGÚN OBJETIVO SELECCIONADO
+        </div>
+    `;
+
+    document.body.classList.remove("danger");
+
+    updateHUD();
+    searchCriminals();
+
+    showAlert("🍎", "Un nuevo Death Note ha caído al mundo humano...", 2500);
+    showShinigami("Kukuku... un nuevo comienzo. Veamos qué haces esta vez.");
 }
 
 
@@ -1588,7 +1646,7 @@ function writeName(){
     if(cautious){
 
         showAlert(
-            "👁️️",
+            "👁",
             "Has escrito demasiados nombres.<br><br>"+
             "La investigación sobre Kira se está intensificando.<br><br>"+
             "<b>DEBES SER MÁS CAUTELOSO.</b>",
@@ -1766,7 +1824,6 @@ function checkDanger(){
 function triggerGameOver(){
     isGameOver = true;
     
-    // Deshabilitar controles
     nameInput.disabled = true;
     causeInput.disabled = true;
     searchInput.disabled = true;

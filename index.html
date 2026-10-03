@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>DEATH NOTE — KIRA SIMULATOR</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    overflow:auto;
+}
+
+body{
+    background:
+    radial-gradient(circle at 50% 40%,#292929 0%,#090909 55%,#000 100%);
+    font-family:Georgia,"Times New Roman",serif;
+    color:#111;
+}
+
+
+.particle{
+    position:fixed;
+    width:2px;
+    height:2px;
+    background:#aaa;
+    opacity:.3;
+    border-radius:50%;
+    animation:float linear infinite;
+    pointer-events:none;
+}
+
+@keyframes float{
+
+    from{
+        transform:translateY(105vh);
+    }
+
+    to{
+        transform:translateY(-10vh);
+    }
+
+}
+
+
+.hud{
+
+    position:fixed;
+
+    top:15px;
+    left:15px;
+
+    width:250px;
+
+    background:rgba(0,0,0,.82);
+
+    color:white;
+
+    border:1px solid #333;
+
+    padding:15px;
+
+    z-index:50;
+
+    font-family:Arial,sans-serif;
+
+    box-shadow:0 0 30px #000;
+
+}
+
+.hud-title{
+
+    color:#aaa;
+
+    font-size:11px;
+
+    letter-spacing:3px;
+
+    margin-bottom:10px;
+
+}
+
+.stat{
+
+    margin:8px 0;
+
+}
+
+.stat-label{
+
+    color:#888;
+
+    font-size:11px;
+
+}
+
+.stat-value{
+
+    font-size:18px;
+
+}
+
+.bar{
+
+    height:6px;
+
+    background:#222;
+
+    margin-top:4px;
+
+}
+
+.bar-inner{
+
+    height:100%;
+
+    width:0%;
+
+    background:#aaa;
+
+    transition:.5s;
+
+}
+
+
+.scene{
+
+    width:min(1200px,94vw);
+
+    min-height:min(760px,90vh);
+
+    height:auto;
+
+    position:relative;
+
+    margin:5vh auto 60px;
+
+    perspective:1800px;
+
+}
+
+
+.book{
+
+    width:100%;
+    min-height:760px;
+
+    height:auto;
+
+    display:flex;
+
+    filter:drop-shadow(0 30px 40px #000);
+
+}
+
+
+.cover{
+
+    width:50%;
+    min-height:760px;
+
+    background-color:#000;
+    background-image:url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/77cc0ddb-7661-4112-916d-d533378655f9/d4furyw-f91de097-294f-4ef6-9d43-f616dd14a9de.jpg/v1/fill/w_708,h_1129,q_75,strp/death_note_portada_1_by_xmarcoxfansubs-d4furyw.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl0sIm9iaiI6W1t7InBhdGgiOiIvZi83N2NjMGRkYi03NjYxLTQxMTItOTE2ZC1kNTMzMzc4NjU1ZjkvZDRmdXJ5dy1mOTFkZTA5Ny0yOTRmLTRlZjYtOWQ0My1mNjE2ZGQxNGE5ZGUuanBnIiwid2lkdGgiOiI8PTcwOCIsImhlaWdodCI6Ijw9MTEyOSJ9XV19.Y21kZmj3l09iwr1He-8wF2AwBtpx4TwulFeB-aAkNcU');
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    border:2px solid #333;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-direction:column;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.cover:after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:16px;
+
+    border:1px solid #333;
+
+}
+
+.title{
+
+    font-size:clamp(42px,6vw,85px);
+
+    letter-spacing:7px;
+
+    text-shadow:
+    4px 4px 0 #111,
+    0 0 30px #000;
+
+    z-index:2;
+
+    text-align:center;
+
+    display:none;
+
+}
+
+.subtitle{
+
+    font-size:11px;
+
+    color:#888;
+
+    letter-spacing:5px;
+
+    margin-top:15px;
+
+    z-index:2;
+
+    text-align:center;
+
+    display:none;
+
+}
+
+.cover-text{
+
+    position:absolute;
+
+    bottom:45px;
+
+    font-size:10px;
+
+    color:#555;
+
+    letter-spacing:3px;
+
+}
+
+
+.page{
+
+    width:50%;
+
+    min-height:760px;
+
+    height:auto;
+
+    padding:40px;
+
+    position:relative;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+    background:
+    linear-gradient(
+        90deg,
+        #cfc5aa,
+        #eee7d5 7%,
+        #e9e0ca
+    );
+
+    box-shadow:inset 8px 0 20px rgba(0,0,0,.3);
+
+}
+
+
+.page:before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+    repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 27px,
+        rgba(70,60,40,.12) 28px
+    );
+
+    opacity:.5;
+
+    pointer-events:none;
+
+}
+
+
+.page::-webkit-scrollbar{
+
+    width:9px;
+
+}
+
+.page::-webkit-scrollbar-track{
+
+    background:#c7bda5;
+
+}
+
+.page::-webkit-scrollbar-thumb{
+
+    background:#444;
+
+    border-radius:10px;
+
+    border:2px solid #c7bda5;
+
+}
+
+.page::-webkit-scrollbar-thumb:hover{
+
+    background:#111;
+
+}
+
+.content{
+
+    position:relative;
+
+    min-height:100%;
+
+    height:auto;
+
+    z-index:2;
+
+}
+
+h1{
+
+    margin:0 0 8px;
+
+    font-size:30px;
+
+    letter-spacing:4px;
+
+}
+
+.quote{
+
+    font-size:12px;
+
+    color:#555;
+
+    margin-bottom:20px;
+
+}
+
+
+input,
+textarea,
+select{
+
+    width:100%;
+
+    border:0;
+
+    border-bottom:2px solid #111;
+
+    background:rgba(255,255,255,.1);
+
+    padding:10px;
+
+    outline:none;
+
+    font-family:Georgia,serif;
+
+    color:#111;
+
+}
+
+input{
+
+    font-size:20px;
+
+}
+
+textarea{
+
+    height:90px;
+
+    resize:vertical;
+
+    min-height:65px;
+
+    font-size:15px;
+
+}
+
+label{
+
+    display:block;
+
+    font-size:11px;
+
+    letter-spacing:2px;
+
+    margin:14px 0 5px;
+
+}
+
+button{
+
+    background:#111;
+
+    color:#eee;
+
+    border:0;
+
+    padding:11px 18px;
+
+    cursor:pointer;
+
+    font-family:Georgia,serif;
+
+    margin-top:10px;
+
+    transition:.2s;
+
+}
+
+button:hover{
+
+    background:#300000;
+
+    transform:translateY(-1px);
+
+}
+
+button:active{
+
+    transform:scale(.96);
+
+}
+
+button.secondary{
+
+    background:#444;
+
+}
+
+
+.search{
+
+    display:flex;
+
+    gap:5px;
+
+}
+
+.search input{
+
+    flex:1;
+
+}
+
+.criminal-list{
+
+    margin-top:8px;
+
+    max-height:145px;
+
+    overflow-y:auto;
+
+    border-top:1px solid #999;
+
+}
+
+.criminal{
+
+    padding:8px;
+
+    border-bottom:1px dotted #999;
+
+    cursor:pointer;
+
+}
+
+.criminal:hover{
+
+    background:rgba(0,0,0,.08);
+
+}
+
+.criminal-name{
+
+    font-weight:bold;
+
+}
+
+.criminal-info{
+
+    font-size:11px;
+
+    color:#555;
+
+}
+
+
+.target{
+
+    border-left:3px solid #111;
+
+    padding:10px;
+
+    margin:10px 0;
+
+    background:rgba(255,255,255,.15);
+
+}
+
+.target-name{
+
+    font-size:20px;
+
+}
+
+
+.history{
+
+    margin-top:15px;
+
+    max-height:120px;
+
+    overflow:auto;
+
+    border-top:1px solid #888;
+
+    padding-top:4px;
+
+}
+
+.history-entry{
+
+    padding:6px 0;
+
+    border-bottom:1px dotted #aaa;
+
+    font-size:12px;
+
+}
+
+
+.alert{
+
+    position:fixed;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%) scale(.8);
+
+    background:#050505;
+
+    color:white;
+
+    padding:28px;
+
+    width:min(430px,90vw);
+
+    text-align:center;
+
+    border:1px solid #555;
+
+    box-shadow:0 0 80px #000;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.3s;
+
+    z-index:100;
+
+}
+
+.alert.show{
+
+    opacity:1;
+
+    transform:translate(-50%,-50%) scale(1);
+
+}
+
+.alert-symbol{
+
+    font-size:48px;
+
+    margin-bottom:10px;
+
+}
+
+
+.shinigami{
+
+    position:fixed;
+
+    right:25px;
+
+    bottom:20px;
+
+    color:#aaa;
+
+    font-family:Arial,sans-serif;
+
+    font-size:12px;
+
+    max-width:260px;
+
+    text-align:right;
+
+    opacity:0;
+
+    transform:translateY(20px);
+
+    transition:.5s;
+
+    z-index:40;
+
+}
+
+.shinigami.show{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+}
+
+
+body.danger{
+
+    animation:dangerPulse 2s infinite;
+
+}
+
+@keyframes dangerPulse{
+
+    0%,100%{
+
+        filter:none;
+
+    }
+
+    50%{
+
+        filter:brightness(.75);
+
+    }
+
+}
+
+
+@media(max-width:800px){
+
+    body{
+
+        overflow:auto;
+
+    }
+
+    .scene{
+
+        position:relative;
+
+        left:auto;
+
+        top:auto;
+
+        transform:none;
+
+        width:94vw;
+
+        min-height:0;
+
+        margin:20px auto 50px;
+
+    }
+
+    .book{
+
+        display:block;
+
+        min-height:0;
+
+        height:auto;
+
+    }
+
+    .cover{
+
+        width:100%;
+
+        min-height:500px;
+
+        height:500px;
+
+    }
+
+    .page{
+
+        width:100%;
+
+        min-height:850px;
+
+        height:auto;
+
+        padding:35px;
+
+        overflow:visible;
+
+    }
+
+    .hud{
+
+        position:relative;
+
+        top:auto;
+
+        left:auto;
+
+        width:calc(100% - 20px);
+
+        margin:10px;
+
+    }
+
+    .shinigami{
+
+        right:15px;
+
+        bottom:15px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<script>
+
+for(let i=0;i<80;i++){
+
+    let p=document.createElement("div");
+
+    p.className="particle";
+
+    p.style.left=Math.random()*100+"vw";
+
+    p.style.animationDuration=
+        (6+Math.random()*12)+"s";
+
+    p.style.animationDelay=
+        (-Math.random()*15)+"s";
+
+    document.body.appendChild(p);
+
+}
+
+</script>
+
+
+
+<div class="hud">
+
+    <div class="hud-title">
+        KIRA STATUS
+    </div>
+
+    <div class="stat">
+
+        <div class="stat-label">
+            NOMBRES ESCRITOS
+        </div>
+
+        <div class="stat-value" id="deathCount">
+            0
+        </div>
+
+    </div>
+
+    <div class="stat">
+
+        <div class="stat-label">
+            NIVEL DE BÚSQUEDA
+        </div>
+
+        <div class="stat-value" id="wantedLevel">
+            0%
+        </div>
+
+        <div class="bar">
+            <div
+                class="bar-inner"
+                id="wantedBar">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="stat">
+
+        <div class="stat-label">
+            SOSPECHA
+        </div>
+
+        <div class="stat-value" id="suspicion">
+            0%
+        </div>
+
+        <div class="bar">
+            <div
+                class="bar-inner"
+                id="suspicionBar">
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div class="scene">
+
+<div class="book">
+
+
+
+<section class="cover">
+
+    <div class="title">
+        DEATH NOTE
+    </div>
+
+    <div class="subtitle">
+        THE HUMAN NAME WAS WRITED 
+    </div>
+
+    <div class="cover-text">
+        KIRA SIMULATION
+    </div>
+
+</section>
+
+
+
+
+<section class="page">
+
+<div class="content">
+
+<h1>DEATH NOTE</h1>
+
+<div class="quote">
+"El humano cuyo nombre sea escrito en esta libreta morira"
+</div>
+
+
+
+<label>
+BUSCAR OBJETIVO
+</label>
+
+<div class="search">
+
+<input
+    id="searchInput"
+    placeholder="Buscar criminal..."
+>
+
+<button onclick="searchCriminals()">
+    BUSCAR
+</button>
+
+</div>
+
+
+<div
+    class="criminal-list"
+    id="criminalList">
+</div>
+
+
+
+<div
+    class="target"
+    id="targetBox">
+
+    <div class="criminal-info">
+        NINGÚN OBJETIVO SELECCIONADO
+    </div>
+
+</div>
+
+
+
+<label>
+NOMBRE DEL OBJETIVO
+</label>
+
+<input
+    id="nameInput"
+    placeholder="Escribe el nombre..."
+    autocomplete="off"
+>
+
+
+
+<label>
+CAUSA DE MUERTE
+</label>
+
+<textarea
+    id="causeInput"
+    placeholder="Déjalo vacío para provocar un paro cardíaco..."
+></textarea>
+
+
+<button onclick="writeName()">
+    ☠ ESCRIBIR EN EL DEATH NOTE
+</button>
+
+
+<button
+    class="secondary"
+    onclick="randomTarget()">
+
+    🎲 OBJETIVO ALEATORIO
+
+</button>
+
+
+
+<div class="history">
+
+<div class="criminal-info">
+    ÚLTIMOS NOMBRES
+</div>
+
+<div id="historyList"></div>
+
+</div>
+
+
+</div>
+
+</section>
+
+</div>
+
+</div>
+
+
+
+<div
+    class="alert"
+    id="alert">
+
+    <div
+        class="alert-symbol"
+        id="alertSymbol">
+        ☠
+    </div>
+
+    <div id="alertText">
+    </div>
+
+</div>
+
+
+
+<div
+    class="shinigami"
+    id="shinigami">
+
+    <b>RYUK:</b><br>
+
+    <span id="shinigamiText">
+        ...
+    </span>
+
+</div>
+
+
+<script>
+
+
+const criminals=[
+
+{
+name:"Akio Kurogane",
+crime:"Atracos a bancos y robo organizado.",
+danger:72
+},
+
+{
+name:"Renji Morimoto",
+crime:"Contrabando y tráfico de objetos robados.",
+danger:61
+},
+
+{
+name:"Daichi Sato",
+crime:"Fraude financiero a gran escala.",
+danger:54
+},
+
+{
+name:"Kenji Arakawa",
+crime:"Extorsión y amenazas contra empresarios.",
+danger:83
+},
+
+{
+name:"Hiro Tanabe",
+crime:"Robo de vehículos y organización criminal.",
+danger:67
+},
+
+{
+name:"Riku Hayashi",
+crime:"Ciberfraude y robo de información.",
+danger:58
+},
+
+{
+name:"Masato Kuroda",
+crime:"Asaltos y robos violentos.",
+danger:89
+},
+
+{
+name:"Takeshi Fujimoto",
+crime:"Contrabando internacional.",
+danger:76
+},
+
+{
+name:"Yuto Kanzaki",
+crime:"Estafas masivas utilizando identidades falsas.",
+danger:63
+},
+
+{
+name:"Shin Okabe",
+crime:"Corrupción y lavado de dinero.",
+danger:70
+},
+
+{
+name:"Kaito Mizuno",
+crime:"Robo organizado.",
+danger:52
+},
+
+{
+name:"Rei Nakamura",
+crime:"Fraude corporativo.",
+danger:48
+},
+
+{
+name:"Sora Takahashi",
+crime:"Contrabando de mercancías.",
+danger:57
+},
+
+{
+name:"Junpei Arai",
+crime:"Extorsión y chantaje.",
+danger:74
+},
+
+{
+name:"Kenta Shimizu",
+crime:"Atracos y robo organizado.",
+danger:81
+}
+
+];
+
+
+
+let deaths=
+Number(localStorage.getItem("dn_deaths"))||0;
+
+let suspicion=
+Number(localStorage.getItem("dn_suspicion"))||0;
+
+let target=null;
+
+
+
+const deathCount=
+document.getElementById("deathCount");
+
+const wantedLevel=
+document.getElementById("wantedLevel");
+
+const wantedBar=
+document.getElementById("wantedBar");
+
+const suspicionText=
+document.getElementById("suspicion");
+
+const suspicionBar=
+document.getElementById("suspicionBar");
+
+const searchInput=
+document.getElementById("searchInput");
+
+const criminalList=
+document.getElementById("criminalList");
+
+const nameInput=
+document.getElementById("nameInput");
+
+const causeInput=
+document.getElementById("causeInput");
+
+const targetBox=
+document.getElementById("targetBox");
+
+const historyList=
+document.getElementById("historyList");
+
+const alertBox=
+document.getElementById("alert");
+
+const alertText=
+document.getElementById("alertText");
+
+const alertSymbol=
+document.getElementById("alertSymbol");
+
+const shinigami=
+document.getElementById("shinigami");
+
+const shinigamiText=
+document.getElementById("shinigamiText");
+
+
+
+function updateHUD(){
+
+    deathCount.textContent=deaths;
+
+    let wanted=
+        Math.min(100,(deaths/92)*100);
+
+    wantedLevel.textContent=
+        Math.round(wanted)+"%";
+
+    wantedBar.style.width=
+        wanted+"%";
+
+
+    suspicion=
+        Math.min(100,suspicion);
+
+    suspicionText.textContent=
+        Math.round(suspicion)+"%";
+
+    suspicionBar.style.width=
+        suspicion+"%";
+
+
+    if(deaths>=92){
+
+        document.body.classList.add("danger");
+
+    }
+
+    localStorage.setItem(
+        "dn_deaths",
+        deaths
+    );
+
+    localStorage.setItem(
+        "dn_suspicion",
+        suspicion
+    );
+
+}
+
+
+
+function searchCriminals(){
+
+    const query=
+        searchInput.value
+        .toLowerCase()
+        .trim();
+
+    const results=
+        criminals.filter(c=>
+            c.name
+            .toLowerCase()
+            .includes(query)
+        );
+
+    criminalList.innerHTML="";
+
+    results.forEach(c=>{
+
+        const div=
+            document.createElement("div");
+
+        div.className="criminal";
+
+        div.innerHTML=`
+
+            <div class="criminal-name">
+                ${c.name}
+            </div>
+
+            <div class="criminal-info">
+                ${c.crime}
+                · Peligrosidad ${c.danger}%
+            </div>
+
+        `;
+
+        div.onclick=()=>selectTarget(c);
+
+        criminalList.appendChild(div);
+
+    });
+
+}
+
+
+
+function selectTarget(c){
+
+    target=c;
+
+    nameInput.value=c.name;
+
+    targetBox.innerHTML=`
+
+        <div class="target-name">
+            ${c.name}
+        </div>
+
+        <div class="criminal-info">
+            ${c.crime}
+        </div>
+
+        <div class="criminal-info">
+            Nivel de peligrosidad:
+            ${c.danger}%
+        </div>
+
+    `;
+
+}
+
+
+
+function randomTarget(){
+
+    /* Si ya no quedan criminales */
+    if(criminals.length===0){
+
+        showAlert(
+            "📓",
+            "No quedan objetivos disponibles.",
+            2200
+        );
+
+        return;
+
+    }
+
+    const c=
+        criminals[
+            Math.floor(
+                Math.random()*criminals.length
+            )
+        ];
+
+    selectTarget(c);
+
+}
+
+
+
+function removeCriminal(name){
+
+    const index=
+        criminals.findIndex(c=>
+            c.name.toLowerCase()===
+            name.toLowerCase()
+        );
+
+    if(index!==-1){
+
+        criminals.splice(index,1);
+
+        if(
+            target &&
+            target.name.toLowerCase()===
+            name.toLowerCase()
+        ){
+
+            target=null;
+
+            targetBox.innerHTML=`
+
+                <div class="criminal-info">
+                    NINGÚN OBJETIVO SELECCIONADO
+                </div>
+
+            `;
+
+        }
+
+        searchCriminals();
+
+    }
+
+}
+
+
+
+function writeName(){
+
+    const name=
+        nameInput.value.trim();
+
+    const cause=
+        causeInput.value.trim();
+
+
+    if(!name){
+
+        showAlert(
+            "⚠",
+            "Debes escribir un nombre.",
+            1800
+        );
+
+        return;
+
+    }
+
+
+    let cautious=false;
+
+    if(deaths>=92){
+
+        cautious=true;
+
+        suspicion+=
+            cause ?
+            2 :
+            5;
+
+    }
+
+    else{
+
+        suspicion+=
+            cause ?
+            1 :
+            2;
+
+    }
+
+
+    deaths++;
+
+
+    const finalCause=
+        cause ||
+        "Paro cardíaco";
+
+
+    addHistory(
+        name,
+        finalCause
+    );
+
+
+
+    removeCriminal(name);
+
+
+    causeInput.value="";
+
+    nameInput.value="";
+
+
+    if(cautious){
+
+        showAlert(
+            "👁️",
+            "Has escrito demasiados nombres.<br><br>"+
+            "La investigación sobre Kira se está intensificando.<br><br>"+
+            "<b>DEBES SER MÁS CAUTELOSO.</b>",
+            3200
+        );
+
+    }
+
+    else{
+
+        showAlert(
+            "☠",
+            "<b>"+name+"</b><br><br>"+
+            "Causa:<br>"+
+            "finalCause",
+            2300
+        );
+
+    }
+
+
+    randomEvent();
+
+    updateHUD();
+
+    checkDanger();
+
+
+}
+
+
+
+function addHistory(name,cause){
+
+    const div=
+        document.createElement("div");
+
+    div.className=
+        "history-entry";
+
+    div.innerHTML=
+        "<b>"+name+"</b><br>"+
+        "<span style='color:#666'>"+
+        cause+
+        "</span>";
+
+    historyList.prepend(div);
+
+}
+
+
+
+function showAlert(symbol,text,time){
+
+    alertSymbol.innerHTML=symbol;
+
+    alertText.innerHTML=text;
+
+    alertBox.classList.add("show");
+
+    setTimeout(()=>{
+
+        alertBox.classList.remove("show");
+
+    },time);
+
+}
+
+
+
+function randomEvent(){
+
+    const chance=
+        Math.random();
+
+    if(chance<.18){
+
+        setTimeout(()=>{
+
+            showShinigami(
+                "Mmm... cada vez escribes más nombres. "+
+                "Esto se está poniendo interesante."
+            );
+
+        },1200);
+
+    }
+
+    else if(chance<.30){
+
+        setTimeout(()=>{
+
+            showShinigami(
+                "Los investigadores están empezando "+
+                "a notar un patrón..."
+            );
+
+        },1200);
+
+        suspicion+=4;
+
+    }
+
+    else if(chance<.38){
+
+        setTimeout(()=>{
+
+            showShinigami(
+                "Jejeje... ¿estás seguro de que "+
+                "nadie puede relacionarte con Kira?"
+            );
+
+        },1200);
+
+        suspicion+=6;
+
+    }
+
+}
+
+
+
+function showShinigami(text){
+
+    shinigamiText.textContent=text;
+
+    shinigami.classList.add("show");
+
+    setTimeout(()=>{
+
+        shinigami.classList.remove("show");
+
+    },5000);
+
+}
+
+
+
+function checkDanger(){
+
+    if(deaths===92){
+
+        showAlert(
+            "🚨",
+            "<b>NIVEL CRÍTICO</b><br><br>"+
+            "Has escrito 92 nombres.<br><br>"+
+            "La investigación de Kira ha alcanzado "+
+            "un punto extremadamente peligroso.",
+            5000
+        );
+
+        showShinigami(
+            "A partir de ahora tendrás que pensar "+
+            "mucho más antes de escribir..."
+        );
+
+    }
+
+}
+
+
+
+searchInput.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.key==="Enter")
+            searchCriminals();
+
+    }
+);
+
+
+
+searchCriminals();
+
+updateHUD();
+
+ 
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.key==="Escape"){
+
+            showShinigami(
+                "No puedes escapar del Death Note..."
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

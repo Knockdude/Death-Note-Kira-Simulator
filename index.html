@@ -171,7 +171,7 @@ body{
     min-height:760px;
 
     background-color:#000;
-    background-image:url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/77cc0ddb-7661-4112-916d-d533378655f9/d4furyw-f91de097-294f-4ef6-9d43-f616dd14a9de.jpg/v1/fill/w_708,h_1129,q_75,strp/death_note_portada_1_by_xmarcoxfansubs-d4furyw.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl0sIm9iaiI6W1t7InBhdGgiOiIvZi83N2NjMGRkYi03NjYxLTQxMTItOTE2ZC1kNTMzMzc4NjU1ZjkvZDRmdXJ5dy1mOTFkZTA5Ny0yOTRmLTRlZjYtOWQ0My1mNjE2ZGQxNGE5ZGUuanBnIiwid2lkdGgiOiI8PTcwOCIsImhlaWdodCI6Ijw9MTEyOSJ9XV19.Y21kZmj3l09iwr1He-8wF2AwBtpx4TwulFeB-aAkNcU');
+    background-image:url('https://tse1.mm.bing.net/th/id/OIP.vzkv2nyL_V0umz151iaqAQHaLz?r=0&rs=1&pid=ImgDetMain&o=7&rm=3", "width":708, "height":1129}]}]}.Y21kZmj3l09iwr1He-8wF2AwBtpx4TwulFeB-aAkNcU');
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -845,6 +845,10 @@ for(let i=0;i<80;i++){
 
     </div>
 
+    <button onclick="askRyukAdvice()" style="width:100%; font-size:10px; padding:6px; margin-top:8px; background:#222;">
+        🍎 PEDIR CONSEJO A RYUK
+    </button>
+
 </div>
 
 
@@ -945,7 +949,7 @@ CAUSA DE MUERTE
 ></textarea>
 
 
-<button onclick="writeName()">
+<button id="writeBtn" onclick="writeName()">
     ☠ ESCRIBIR EN EL DEATH NOTE
 </button>
 
@@ -1198,52 +1202,63 @@ danger:96
 
 ];
 
-const firstNames=["Kazuma","Hideo","Takashi","Shinji","Minoru","Sora","Naoto","Keigo","Tomoaki","Yuji","Isamu","Ryuunosuke","Katsuri","Genji","Yoshiaki"];
-const lastNames=["Takahashi","Kobayashi","Watanabe","Yamamoto","Yoshida","Yamaguchi","Matsumoto","Inoue","Kimura","H林","Saito","Shimizu","Yamazaki","Mori","Abe"];
+const firstNames=["Kazuma","Hideo","Takashi","Shinji","Minoru","Sora","Naoto","Keigo","Tomoaki","Yuji","Isamu","Ryuunosuke","Katsuri","Genji","Yoshiaki","Kenichi","Taro","Kazuya","Shohei","Mitsuhiro","Kazuki","Hiroshi","Tatsuro"];
+const lastNames=["Takahashi","Kobayashi","Watanabe","Yamamoto","Yoshida","Yamaguchi","Matsumoto","Inoue","Kimura","Saito","Shimizu","Yamazaki","Mori","Abe","Hashimoto","Sasaki","Ishikawa","Ogawa","Fujita","Okada"];
+
 const crimesList=[
-"Fraude fiscal masivo.",
-"Tráfico ilegal de armas.",
-"Liderazgo de red de ciberataques.",
-"Homicidio sin resolver.",
-"Contrabando de sustancias ilícitas.",
-"Robo a mano armada en bancos.",
-"Extorsión a comercios locales.",
-"Secuestro e intimidación.",
-"Lavado de dinero internacional.",
-"Falsificación de divisas."
+"Fraude fiscal masivo y evasión corporativa.",
+"Tráfico ilegal de armas pesadas en Shinjuku.",
+"Liderazgo de red clandestina de ciberataques.",
+"Homicidio calificado sin resolver en Roppongi.",
+"Contrabando de sustancias ilícitas en los puertos.",
+"Robo a mano armada en entidades bancarias.",
+"Extorsión y chantaje a comercios locales de Tokio.",
+"Secuestro e intimidación a funcionarios.",
+"Lavado de dinero internacional mediante criptoactivos.",
+"Falsificación de divisas y pasaportes diplomáticos.",
+"Espionaje industrial contra multinacionales tecnológicas.",
+"Operación de juegos de azar ilegales dirigidos por Yakuza."
+];
+
+const ryukTips=[
+"Si especificas detalles complejos como accidentes o suicidios, 'L' tardará más en conectar los casos con paros cardíacos.",
+"No mates solo a criminales en horario japonés. Varía las horas o pensarán que eres un estudiante o un oficinista.",
+"Podrías obligar a un criminal a escribir una carta de confesión falsa antes de morir para desviar la investigación.",
+"Atacar solo a criminales de la TV japonesa acota tu ubicación física. Busca objetivos fuera de la región.",
+"Si matas demasiado rápido, el patrón revelará que no duermes a ciertas horas. Varía el ritmo.",
+"Recuerda que si la causa es físicamente imposible, la víctima simplemente morirá de un paro cardíaco."
 ];
 
 let addedCounter=1;
+let isGameOver=false;
 
 function generateNewCriminals(count){
+    if(isGameOver) return;
 
     for(let i=0;i<count;i++){
 
         const randomFirst=firstNames[Math.floor(Math.random()*firstNames.length)];
-
         const randomLast=lastNames[Math.floor(Math.random()*lastNames.length)];
 
-        const name=`${randomFirst} ${randomLast} #${addedCounter++}`;
-
+        const name=`${randomFirst} ${randomLast}`;
         const crime=crimesList[Math.floor(Math.random()*crimesList.length)];
-
         const danger=Math.floor(Math.random()*51)+45;
 
-        criminals.push({name,crime,danger});
+        const exists = criminals.some(c => c.name === name);
+        const finalName = exists ? `${name} (${addedCounter++})` : name;
+
+        criminals.push({name: finalName, crime, danger});
 
     }
 
     searchCriminals();
-
-    showShinigami("Nuevos criminales han aparecido en las noticias...");
+    showShinigami("Aparecieron 10 nuevos criminales en las noticias de Japón...");
 
 }
 
 setInterval(()=>{
-
-    generateNewCriminals(5);
-
-},120000);
+    generateNewCriminals(10);
+},60000);
 
 
 
@@ -1331,7 +1346,7 @@ function updateHUD(){
         suspicion+"%";
 
 
-    if(deaths>=92){
+    if(deaths>=92 || (wanted >= 100 && suspicion >= 100)){
 
         document.body.classList.add("danger");
 
@@ -1347,6 +1362,16 @@ function updateHUD(){
         suspicion
     );
 
+    if(wanted >= 100 && suspicion >= 100 && !isGameOver){
+        triggerGameOver();
+    }
+
+}
+
+function askRyukAdvice(){
+    if(isGameOver) return;
+    const randomTip = ryukTips[Math.floor(Math.random() * ryukTips.length)];
+    showShinigami("Idea de Ryuk: " + randomTip);
 }
 
 
@@ -1398,6 +1423,7 @@ function searchCriminals(){
 
 
 function selectTarget(c){
+    if(isGameOver) return;
 
     target=c;
 
@@ -1425,8 +1451,8 @@ function selectTarget(c){
 
 
 function randomTarget(){
+    if(isGameOver) return;
 
-    /* Si ya no quedan criminales */
     if(criminals.length===0){
 
         showAlert(
@@ -1491,6 +1517,7 @@ function removeCriminal(name){
 
 
 function writeName(){
+    if(isGameOver) return;
 
     const name=
         nameInput.value.trim();
@@ -1561,7 +1588,7 @@ function writeName(){
     if(cautious){
 
         showAlert(
-            "👁️",
+            "👁️️",
             "Has escrito demasiados nombres.<br><br>"+
             "La investigación sobre Kira se está intensificando.<br><br>"+
             "<b>DEBES SER MÁS CAUTELOSO.</b>",
@@ -1680,6 +1707,20 @@ function randomEvent(){
 
     }
 
+    else if(suspicion > 60 && chance < .55){
+
+        setTimeout(()=>{
+
+            const tip = ryukTips[Math.floor(Math.random() * ryukTips.length)];
+
+            showShinigami(
+                "Oye Kira, la policía se acerca... " + tip
+            );
+
+        },1200);
+
+    }
+
 }
 
 
@@ -1720,6 +1761,43 @@ function checkDanger(){
 
     }
 
+}
+
+function triggerGameOver(){
+    isGameOver = true;
+    
+    // Deshabilitar controles
+    nameInput.disabled = true;
+    causeInput.disabled = true;
+    searchInput.disabled = true;
+    document.getElementById("writeBtn").disabled = true;
+
+    showShinigami("Kukuku... Se acabó el tiempo, Kira. El nivel de búsqueda y la sospecha llegaron al máximo.");
+
+    setTimeout(()=>{
+        showAlert(
+            "🍎",
+            "<b>RYUK HA TOMADO EL CONTROL</b><br><br>"+
+            "<i>'Fue divertido mientras duró, pero la policía te ha acorralado.'</i><br><br>"+
+            "Ryuk te obliga a tomar la pluma...",
+            4000
+        );
+    }, 2000);
+
+    setTimeout(()=>{
+        nameInput.value = "TU PROPIO NOMBRE";
+        causeInput.value = "Paro cardíaco por acorralamiento de la policía.";
+        
+        showAlert(
+            "☠",
+            "<b>GAME OVER</b><br><br>"+
+            "Has escrito tu propio nombre en la Death Note.<br><br>"+
+            "<i>Causa: Paro cardíaco</i>",
+            10000
+        );
+
+        addHistory("TU PROPIO NOMBRE", "Paro cardíaco (Game Over)");
+    }, 6500);
 }
 
 

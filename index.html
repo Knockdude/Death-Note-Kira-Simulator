@@ -1104,9 +1104,146 @@ danger:74
 name:"Kenta Shimizu",
 crime:"Atracos y robo organizado.",
 danger:81
+},
+
+{
+name:"Ryota Endo",
+crime:"Sabotaje industrial y espionaje corporativo.",
+danger:65
+},
+
+{
+name:"Naoki Noguchi",
+crime:"Tráfico Ilícito y posesión de armas de fuego.",
+danger:88
+},
+
+{
+name:"Takuya Hoshino",
+crime:"Falsificación de documentos y divisas.",
+danger:59
+},
+
+{
+name:"Goro Sugiyama",
+crime:"Líder de pandilla y violencia callejera.",
+danger:85
+},
+
+{
+name:"Osamu Kishimoto",
+crime:"Manipulación del mercado bursátil y fraude.",
+danger:62
+},
+
+{
+name:"Kazuki Sawada",
+crime:"Robo de obras de arte y antigüedades.",
+danger:50
+},
+
+{
+name:"Haruto Murata",
+crime:"Secuestro y solicitud de rescate.",
+danger:94
+},
+
+{
+name:"Shota Nishimura",
+crime:"Infiltración de redes públicas y hackeo.",
+danger:71
+},
+
+{
+name:"Eiji Matsui",
+crime:"Soborno a funcionarios públicos.",
+danger:55
+},
+
+{
+name:"Yoshiro Baba",
+crime:"Tráfico de armas a gran escala.",
+danger:91
+},
+
+{
+name:"Daisuke Chiba",
+crime:"Robo de identidad y ciberdelincuencia.",
+danger:64
+},
+
+{
+name:"Satoshi Ueda",
+crime:"Asalto a mano armada.",
+danger:78
+},
+
+{
+name:"Atsushi Katayama",
+crime:"Soterrado de desechos tóxicos e ilegalidad ambiental.",
+danger:45
+},
+
+{
+name:"Hayato Ichikawa",
+crime:"Piratería marítima y secuestro de embarcaciones.",
+danger:87
+},
+
+{
+name:"Tatsuya Ishida",
+crime:"Violación de seguridad y robo de secretos militares.",
+danger:96
 }
 
 ];
+
+const firstNames=["Kazuma","Hideo","Takashi","Shinji","Minoru","Sora","Naoto","Keigo","Tomoaki","Yuji","Isamu","Ryuunosuke","Katsuri","Genji","Yoshiaki"];
+const lastNames=["Takahashi","Kobayashi","Watanabe","Yamamoto","Yoshida","Yamaguchi","Matsumoto","Inoue","Kimura","H林","Saito","Shimizu","Yamazaki","Mori","Abe"];
+const crimesList=[
+"Fraude fiscal masivo.",
+"Tráfico ilegal de armas.",
+"Liderazgo de red de ciberataques.",
+"Homicidio sin resolver.",
+"Contrabando de sustancias ilícitas.",
+"Robo a mano armada en bancos.",
+"Extorsión a comercios locales.",
+"Secuestro e intimidación.",
+"Lavado de dinero internacional.",
+"Falsificación de divisas."
+];
+
+let addedCounter=1;
+
+function generateNewCriminals(count){
+
+    for(let i=0;i<count;i++){
+
+        const randomFirst=firstNames[Math.floor(Math.random()*firstNames.length)];
+
+        const randomLast=lastNames[Math.floor(Math.random()*lastNames.length)];
+
+        const name=`${randomFirst} ${randomLast} #${addedCounter++}`;
+
+        const crime=crimesList[Math.floor(Math.random()*crimesList.length)];
+
+        const danger=Math.floor(Math.random()*51)+45;
+
+        criminals.push({name,crime,danger});
+
+    }
+
+    searchCriminals();
+
+    showShinigami("Nuevos criminales han aparecido en las noticias...");
+
+}
+
+setInterval(()=>{
+
+    generateNewCriminals(5);
+
+},120000);
 
 
 
@@ -1439,7 +1576,7 @@ function writeName(){
             "☠",
             "<b>"+name+"</b><br><br>"+
             "Causa:<br>"+
-            "finalCause",
+            finalCause,
             2300
         );
 
